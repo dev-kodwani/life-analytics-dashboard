@@ -1,0 +1,119 @@
+{
+  "theme": "Dark",
+  "archetype": "Archetype 4 (Swiss & High-Contrast) - Dark Mode",
+  "typography": {
+    "primary_font": "Cabinet Grotesk",
+    "secondary_font": "Manrope",
+    "forbidden_fonts": ["Inter", "Roboto", "Space Grotesk"],
+    "scales": {
+      "h1_score": { "fontSize": 64, "fontFamily": "Cabinet Grotesk", "fontWeight": "800", "letterSpacing": -1.5 },
+      "h1": { "fontSize": 32, "fontFamily": "Cabinet Grotesk", "fontWeight": "700", "letterSpacing": -0.5 },
+      "h2": { "fontSize": 24, "fontFamily": "Cabinet Grotesk", "fontWeight": "700", "letterSpacing": -0.3 },
+      "h3": { "fontSize": 20, "fontFamily": "Cabinet Grotesk", "fontWeight": "600" },
+      "body": { "fontSize": 16, "fontFamily": "Manrope", "fontWeight": "400", "lineHeight": 24 },
+      "label": { "fontSize": 12, "fontFamily": "Manrope", "fontWeight": "600", "letterSpacing": 1.0, "textTransform": "uppercase" }
+    }
+  },
+  "colors": {
+    "background": {
+      "main": "#050505",
+      "surface": "#121212",
+      "surface_elevated": "#1E1E1E"
+    },
+    "text": {
+      "primary": "#FFFFFF",
+      "secondary": "#A1A1AA",
+      "disabled": "#52525B"
+    },
+    "borders": {
+      "subtle": "#27272A",
+      "focus": "#FFFFFF"
+    },
+    "categories": {
+      "health": "#10B981",
+      "learning": "#3B82F6",
+      "career": "#F59E0B",
+      "personal_growth": "#8B5CF6",
+      "money": "#EAB308"
+    },
+    "heatmap": {
+      "level_0": "#121212",
+      "level_1": "#064E3B",
+      "level_2": "#047857",
+      "level_3": "#10B981",
+      "level_4": "#34D399"
+    }
+  },
+  "spacing_and_layout": {
+    "grid": "Mobile-first full width, safe area margins",
+    "padding": {
+      "xs": 4,
+      "sm": 8,
+      "md": 16,
+      "lg": 24,
+      "xl": 32,
+      "xxl": 48
+    },
+    "border_radius": {
+      "sm": 8,
+      "md": 16,
+      "lg": 24,
+      "full": 9999
+    }
+  },
+  "components": {
+    "bottom_tabs": {
+      "style": "Opaque dark surface (#121212) with subtle top border (#27272A). Active icon pure white, inactive #A1A1AA."
+    },
+    "life_score_ring": {
+      "style": "SVG circular progress. Background track #27272A, Foreground track uses solid white (#FFFFFF). Large typography (h1_score) in the center."
+    },
+    "heatmap_calendar": {
+      "style": "GitHub-style 7xN grid of rounded squares (border-radius: 4px). Gap: 4px. Colors map to activity levels."
+    },
+    "category_cards": {
+      "style": "Flat surface (#121212), 16px border radius, 1px subtle border. Left-aligned text, top-right category icon in designated category color."
+    },
+    "daily_check_in_list": {
+      "style": "Notion-like to-do list. Custom checkbox component (circle, hollow when empty, filled with category color and white checkmark when done)."
+    },
+    "buttons": {
+      "primary": {
+        "backgroundColor": "#FFFFFF",
+        "color": "#050505",
+        "borderRadius": 9999,
+        "paddingVertical": 16,
+        "fontWeight": "700"
+      }
+    }
+  },
+  "screens": {
+    "Dashboard": {
+      "layout": "Vertical ScrollView. Top: Safe Area + Header (Greeting). Section 1: Life Score Ring (Centered). Section 2: Heatmap. Section 3: 2-column grid of Category Scores. Section 4: Current Streaks."
+    },
+    "Daily_Check_In": {
+      "layout": "Vertical ScrollView. Top: Date Header. Body: Grouped lists by Category. Each group has a Label and items with checkboxes. Sticky Bottom Footer: 'Save Day' primary button."
+    },
+    "Insights": {
+      "layout": "Vertical ScrollView. Charts section: Weekly/Monthly trends. Correlations section: Text-heavy insights."
+    },
+    "History": {
+      "layout": "FlatList/SectionList. Timeline view of past days. Each row shows Date, Overall Score, and mini dots for completed categories."
+    },
+    "Settings": {
+      "layout": "Vertical ScrollView. Profile section, Habit management, Notification toggles, Theme toggle."
+    }
+  },
+  "instructions_to_main_agent": [
+    "Build strictly as a React Native / Expo application using View, Text, ScrollView, and StyleSheet.",
+    "Do NOT use HTML/DOM elements like div, span, or standard web Tailwind CSS.",
+    "Implement the custom fonts (Cabinet Grotesk, Manrope) via expo-font.",
+    "ALL interactive elements (TouchableOpacity, Pressable, TextInput) MUST include a data-testid attribute in the format kebab-case-role.",
+    "Use @expo/vector-icons or lucide-react-native for all iconography.",
+    "Use react-native-svg for the Life Score Ring and Heatmap calendar blocks.",
+    "Maintain strict Dark Mode aesthetics: deep blacks (#050505) with #121212 for elevated cards.",
+    "Ensure generous padding (minimum 24px horizontal on main views) for a premium feel.",
+    "Use subtle borders (#27272A) instead of drop shadows in dark mode."
+  ],
+  "image_urls": {}
+}
