@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from "react";
-import { Animated, StyleSheet, Text, View } from "react-native";
+import { Animated, Platform, StyleSheet, Text, View } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import { theme } from "@/src/lib/theme";
 
@@ -12,27 +12,28 @@ type Props = {
 export const Toast: React.FC<Props> = ({ visible, message, onHide }) => {
   const opacity = useRef(new Animated.Value(0)).current;
   const translateY = useRef(new Animated.Value(20)).current;
+  const useNative = Platform.OS !== "web";
 
   useEffect(() => {
     if (visible) {
       Animated.parallel([
-        Animated.timing(opacity, { toValue: 1, duration: 200, useNativeDriver: true }),
-        Animated.spring(translateY, { toValue: 0, useNativeDriver: true, friction: 7 }),
+        Animated.timing(opacity, { toValue: 1, duration: 200, useNativeDriver: useNative }),
+        Animated.spring(translateY, { toValue: 0, useNativeDriver: useNative, friction: 7 }),
       ]).start();
       const t = setTimeout(() => {
         Animated.parallel([
-          Animated.timing(opacity, { toValue: 0, duration: 200, useNativeDriver: true }),
-          Animated.timing(translateY, { toValue: 20, duration: 200, useNativeDriver: true }),
+          Animated.timing(opacity, { toValue: 0, duration: 200, useNativeDriver: useNative }),
+          Animated.timing(translateY, { toValue: 20, duration: 200, useNativeDriver: useNative }),
         ]).start(() => onHide());
       }, 1800);
       return () => clearTimeout(t);
     }
-  }, [visible, opacity, translateY, onHide]);
+  }, [visible, opacity, translateY, onHide, useNative]);
 
   if (!visible) return null;
 
   return (
-    <View pointerEvents="none" style={styles.wrap} testID="toast">
+    <View style={styles.wrap} testID="toast">
       <Animated.View style={[styles.toast, { opacity, transform: [{ translateY }] }]}>
         <Ionicons name="checkmark-circle" size={18} color={theme.colors.success} />
         <Text style={styles.text}>{message}</Text>
@@ -49,6 +50,7 @@ const styles = StyleSheet.create({
     right: 0,
     alignItems: "center",
     zIndex: 1000,
+    pointerEvents: "none",
   },
   toast: {
     flexDirection: "row",
