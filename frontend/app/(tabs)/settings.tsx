@@ -31,6 +31,7 @@ export default function Settings() {
   const [saving, setSaving] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editingName, setEditingName] = useState("");
+  const [editingCategory, setEditingCategory] = useState<string | null>(null);
 
   const load = useCallback(async () => {
     try {
@@ -85,11 +86,15 @@ export default function Settings() {
 
   const handleRenameSave = async () => {
     if (!editingId) return;
-    if (editingName.trim()) {
-      await api.updateHabit(editingId, { name: editingName.trim() });
+    const patch: { name?: string; category?: string } = {};
+    if (editingName.trim()) patch.name = editingName.trim();
+    if (editingCategory) patch.category = editingCategory;
+    if (Object.keys(patch).length > 0) {
+      await api.updateHabit(editingId, patch);
     }
     setEditingId(null);
     setEditingName("");
+    setEditingCategory(null);
     load();
   };
 
@@ -130,36 +135,84 @@ export default function Settings() {
             {grouped[cat].map((h) => (
               <View key={h.id} style={styles.row}>
                 {editingId === h.id ? (
-                  <TextInput
-                    style={styles.editInput}
-                    value={editingName}
-                    onChangeText={setEditingName}
-                    autoFocus
-                    onBlur={handleRenameSave}
-                    onSubmitEditing={handleRenameSave}
-                    placeholder="Habit name"
-                    placeholderTextColor={theme.colors.textMuted}
-                    testID={`edit-input-${h.id}`}
-                  />
+                  <View style={styles.editArea}>
+                    <TextInput
+                      style={styles.editInput}
+                      value={editingName}
+                      onChangeText={setEditingName}
+                      autoFocus
+                      onSubmitEditing={handleRenameSave}
+                      placeholder="Habit name"
+                      placeholderTextColor={theme.colors.textMuted}
+                      testID={`edit-input-${h.id}`}
+                    />
+                    <ScrollView
+                      horizontal
+                      showsHorizontalScrollIndicator={false}
+                      contentContainerStyle={{ gap: 6, paddingVertical: 6 }}
+                    >
+                      {categories.map((c) => {
+                        const sel = c === (editingCategory ?? h.category);
+                        return (
+                          <TouchableOpacity
+                            key={c}
+                            onPress={() => setEditingCategory(c)}
+                            style={[
+                              styles.catChip,
+                              { borderColor: sel ? categoryColor(c) : theme.colors.border },
+                              sel && { backgroundColor: theme.colors.surfaceElevated },
+                            ]}
+                            testID={`edit-cat-${h.id}-${c.toLowerCase().replace(/\s+/g, "-")}`}
+                          >
+                            <View style={[styles.catDot, { backgroundColor: categoryColor(c) }]} />
+                            <Text style={styles.catChipText}>{c}</Text>
+                          </TouchableOpacity>
+                        );
+                      })}
+                    </ScrollView>
+                    <View style={styles.editActions}>
+                      <TouchableOpacity
+                        onPress={() => {
+                          setEditingId(null);
+                          setEditingName("");
+                          setEditingCategory(null);
+                        }}
+                        style={styles.cancelBtn}
+                        testID={`cancel-edit-${h.id}`}
+                      >
+                        <Text style={styles.cancelText}>Cancel</Text>
+                      </TouchableOpacity>
+                      <TouchableOpacity
+                        onPress={handleRenameSave}
+                        style={styles.saveSmallBtn}
+                        testID={`save-edit-${h.id}`}
+                      >
+                        <Text style={styles.saveSmallText}>Save</Text>
+                      </TouchableOpacity>
+                    </View>
+                  </View>
                 ) : (
                   <TouchableOpacity
                     style={styles.rowName}
                     onPress={() => {
                       setEditingId(h.id);
                       setEditingName(h.name);
+                      setEditingCategory(h.category);
                     }}
                     testID={`edit-habit-${h.id}`}
                   >
                     <Text style={styles.habitName}>{h.name}</Text>
                   </TouchableOpacity>
                 )}
-                <TouchableOpacity
-                  onPress={() => handleDelete(h.id)}
-                  style={styles.delBtn}
-                  testID={`delete-habit-${h.id}`}
-                >
-                  <Ionicons name="trash-outline" size={18} color={theme.colors.textSecondary} />
-                </TouchableOpacity>
+                {editingId !== h.id && (
+                  <TouchableOpacity
+                    onPress={() => handleDelete(h.id)}
+                    style={styles.delBtn}
+                    testID={`delete-habit-${h.id}`}
+                  >
+                    <Ionicons name="trash-outline" size={18} color={theme.colors.textSecondary} />
+                  </TouchableOpacity>
+                )}
               </View>
             ))}
           </View>
@@ -293,15 +346,33 @@ const styles = StyleSheet.create({
   rowName: { flex: 1 },
   habitName: { color: theme.colors.textPrimary, fontSize: 15, fontWeight: "500" },
   editInput: {
-    flex: 1,
     color: theme.colors.textPrimary,
     fontSize: 15,
     fontWeight: "500",
-    backgroundColor: theme.colors.surface,
+    backgroundColor: theme.colors.surfaceElevated,
     borderRadius: 8,
     paddingHorizontal: 10,
     paddingVertical: 8,
+    borderWidth: 1,
+    borderColor: theme.colors.border,
   },
+  editArea: { flex: 1, paddingVertical: 4 },
+  editActions: { flexDirection: "row", justifyContent: "flex-end", gap: 8, marginTop: 4 },
+  cancelBtn: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 8, backgroundColor: theme.colors.surfaceElevated },
+  cancelText: { color: theme.colors.textSecondary, fontSize: 13, fontWeight: "600" },
+  saveSmallBtn: { paddingHorizontal: 14, paddingVertical: 8, borderRadius: 8, backgroundColor: theme.colors.accent },
+  saveSmallText: { color: theme.colors.bg, fontSize: 13, fontWeight: "700" },
+  catChip: {
+    flexDirection: "row",
+    alignItems: "center",
+    paddingHorizontal: 10,
+    paddingVertical: 6,
+    borderRadius: 999,
+    borderWidth: 1,
+    backgroundColor: theme.colors.surface,
+    flexShrink: 0,
+  },
+  catChipText: { color: theme.colors.textPrimary, fontSize: 12, fontWeight: "600" },
   delBtn: { padding: 8 },
   aboutCard: {
     marginTop: 16,

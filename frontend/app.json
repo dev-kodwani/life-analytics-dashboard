@@ -1,7 +1,7 @@
 {
   "expo": {
-    "name": "frontend",
-    "slug": "frontend",
+    "name": "Life Analytics",
+    "slug": "life-analytics",
     "version": "1.0.0",
     "orientation": "portrait",
     "icon": "./assets/images/icon.png",
@@ -21,7 +21,15 @@
     "web": {
       "bundler": "metro",
       "output": "single",
-      "favicon": "./assets/images/favicon.png"
+      "favicon": "./assets/images/favicon.png",
+      "name": "Life Analytics",
+      "shortName": "Life",
+      "lang": "en",
+      "themeColor": "#050505",
+      "backgroundColor": "#050505",
+      "display": "standalone",
+      "orientation": "portrait",
+      "description": "Track your habits in under 30 seconds. Life Score, streaks, trends and correlations — automated."
     },
     "plugins": [
       "expo-router",

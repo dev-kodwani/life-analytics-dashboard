@@ -4,7 +4,7 @@ import pytest
 import requests
 from datetime import date
 
-BASE_URL = os.environ.get("EXPO_PUBLIC_BACKEND_URL", "https://life-score-5.preview.emergentagent.com").rstrip("/")
+BASE_URL = os.environ["EXPO_PUBLIC_BACKEND_URL"].rstrip("/")
 API = f"{BASE_URL}/api"
 
 
@@ -116,3 +116,83 @@ class TestAnalytics:
         assert isinstance(d["habit_frequency"], list)
         assert isinstance(d["correlations"], list)
         assert isinstance(d["narratives"], list)
+
+
+# New feature tests: mood/energy/notes persistence on check-ins
+class TestCheckinExtras:
+    def test_checkin_with_mood_energy_notes_persists(self, s):
+        today = date.today().isoformat()
+        habits = s.get(f"{API}/habits").json()
+        ids = [h["id"] for h in habits[:2]]
+
+        payload = {
+            "date": today,
+            "completed_habit_ids": ids,
+            "mood": 4,
+            "energy": 3,
+            "notes": "TEST_note feeling good",
+        }
+        r = s.post(f"{API}/checkins", json=payload)
+        assert r.status_code == 200
+        body = r.json()
+        assert body["mood"] == 4
+        assert body["energy"] == 3
+        assert body["notes"] == "TEST_note feeling good"
+
+        # Verify persistence via GET
+        rg = s.get(f"{API}/checkins/{today}")
+        assert rg.status_code == 200
+        got = rg.json()
+        assert got["mood"] == 4
+        assert got["energy"] == 3
+        assert got["notes"] == "TEST_note feeling good"
+        assert set(got["completed_habit_ids"]) == set(ids)
+
+    def test_checkin_update_clears_notes(self, s):
+        today = date.today().isoformat()
+        habits = s.get(f"{API}/habits").json()
+        ids = [h["id"] for h in habits[:1]]
+        # Set notes then clear
+        s.post(f"{API}/checkins", json={"date": today, "completed_habit_ids": ids, "notes": "TEST_x"})
+        r = s.post(f"{API}/checkins", json={"date": today, "completed_habit_ids": ids, "notes": None})
+        assert r.status_code == 200
+        rg = s.get(f"{API}/checkins/{today}").json()
+        assert rg.get("notes") in (None, "")
+
+
+# Category change moves habit between groups
+class TestCategoryChange:
+    def test_update_habit_category(self, s):
+        # Create
+        r = s.post(f"{API}/habits", json={"name": "TEST_MoveMe", "category": "Health"})
+        assert r.status_code == 200
+        hid = r.json()["id"]
+        assert r.json()["category"] == "Health"
+
+        # Change category
+        r2 = s.put(f"{API}/habits/{hid}", json={"category": "Career"})
+        assert r2.status_code == 200
+        assert r2.json()["category"] == "Career"
+
+        # Verify via list
+        lst = s.get(f"{API}/habits").json()
+        found = [h for h in lst if h["id"] == hid]
+        assert found and found[0]["category"] == "Career"
+
+        # Cleanup
+        s.delete(f"{API}/habits/{hid}")
+
+
+# Regression: dashboard still returns habit_streaks
+class TestDashboardHabitStreaks:
+    def test_dashboard_has_habit_streaks(self, s):
+        r = s.get(f"{API}/analytics/dashboard")
+        assert r.status_code == 200
+        d = r.json()
+        assert "habit_streaks" in d
+        assert isinstance(d["habit_streaks"], dict)
+        # Every habit id should be a key
+        habits = s.get(f"{API}/habits").json()
+        for h in habits:
+            assert h["id"] in d["habit_streaks"]
+            assert isinstance(d["habit_streaks"][h["id"]], int)

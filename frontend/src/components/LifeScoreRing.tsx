@@ -46,7 +46,7 @@ export const LifeScoreRing: React.FC<Props> = ({
           transform={`rotate(-90 ${size / 2} ${size / 2})`}
         />
       </Svg>
-      <View style={styles.center} pointerEvents="none">
+      <View pointerEvents="none" style={styles.center}>
         <Text style={styles.score} testID="life-score-value">{display}</Text>
         <Text style={styles.total}>/ 100</Text>
         <Text style={styles.label}>{label}</Text>
